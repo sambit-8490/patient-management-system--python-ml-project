@@ -1,4 +1,4 @@
-# 🏥 Hospital Management System (Mini Project)
+# 🏥 Patient Management System (Mini Project)
 
 A comprehensive web-based Hospital Management System designed to streamline patient appointments, doctor management, treatment records, and billing processes. This mini project demonstrates full-stack development with a normalized database design.
 
