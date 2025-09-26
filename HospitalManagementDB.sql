@@ -215,3 +215,4 @@ LEFT JOIN Treatments t ON a.AppointmentID = t.AppointmentID
 LEFT JOIN Prescriptions pr ON t.TreatmentID = pr.TreatmentID
 LEFT JOIN Medications m ON pr.MedicationID = m.MedicationID
 LEFT JOIN Billing b ON a.AppointmentID = b.AppointmentID;
+
