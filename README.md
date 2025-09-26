@@ -134,9 +134,12 @@ python manage.py load_sample_data
 ```bash
 python manage.py runserver
 ```
-
 Visit `http://127.0.0.1:8000` to access the application.
 
+### 4. Quit Server
+```bash
+CTRL + C 
+```
 ## Default Login Credentials
 
 ### User Credentials Pattern

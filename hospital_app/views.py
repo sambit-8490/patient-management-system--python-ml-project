@@ -339,6 +339,20 @@ def billing_list(request):
     
     bills = Billing.objects.select_related('appointment__patient', 'appointment__doctor').order_by('-billing_date')
     
+    # Calculate paid bills count
+    paid_count = bills.filter(payment_status='Paid').count()
+
+    # Calculate Pending bills count
+    pending_count = bills.filter(payment_status='Pending').count()
+
+    # Calculate Total amount
+    if bills.exists():
+        # Filter paid bills first, then sum their amounts
+        paid_bills = bills.filter(payment_status='Paid')
+        total_amount = sum(int(bill.amount) for bill in paid_bills)
+    else:
+        total_amount = 0
+    
     # Filter by payment status if provided
     status_filter = request.GET.get('status', '')
     if status_filter:
@@ -348,10 +362,12 @@ def billing_list(request):
         'bills': bills,
         'status_filter': status_filter,
         'role': role,
+        'paid_count': paid_count,
+        'pending_count':pending_count,
+        'total_amount': total_amount # Add this line
     }
     
     return render(request, 'hospital_app/billing_list.html', context)
-
 
 @login_required
 def update_payment_status(request, BillID):

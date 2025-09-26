@@ -84,9 +84,7 @@
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Paid Bills</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {% for bill in bills %}
-                                {% if bill.payment_status == 'Paid' %}{{ forloop.counter0|add:1 }}{% endif %}
-                            {% empty %}0{% endfor %}
+                        {{ paid_count }}
                         </div>
                     </div>
                     <div class="col-auto">
@@ -105,9 +103,7 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Pending Bills</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {% for bill in bills %}
-                                {% if bill.payment_status == 'Pending' %}{{ forloop.counter0|add:1 }}{% endif %}
-                            {% empty %}0{% endfor %}
+                            {{pending_count}}
                         </div>
                     </div>
                     <div class="col-auto">
@@ -124,9 +120,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Total Amount</div>
+                            Total Amount Recieved</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            ${% for bill in bills %}{{ bill.amount|add:0 }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}
+                            {{total_amount}}
                         </div>
                     </div>
                     <div class="col-auto">
