@@ -7,6 +7,8 @@ crispy-bootstrap5==0.7
 django-extensions==3.2.3
 whitenoise==6.6.0
 gunicorn==21.2.0
+mysql-connector-python==8.2.0
+
 
 
 

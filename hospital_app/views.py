@@ -67,7 +67,7 @@ def admin_dashboard(request, context):
     pending_bills = Billing.objects.filter(payment_status='Pending').count()
     
     recent_appointments = Appointment.objects.select_related('patient', 'doctor').order_by('-appointment_date')[:10]
-    recent_patients = Patient.objects.order_by('-patient_id')[:5]
+    recent_patients = Patient.objects.order_by('-PatientID')[:5]
     
     # Statistics for charts
     appointments_by_status = Appointment.objects.values('status').annotate(count=Count('status'))
@@ -139,7 +139,7 @@ def staff_dashboard(request, context):
         payment_status='Pending'
     ).select_related('appointment__patient', 'appointment__doctor')[:10]
     
-    recent_patients = Patient.objects.order_by('-patient_id')[:10]
+    recent_patients = Patient.objects.order_by('-PatientID')[:10]
     
     context.update({
         'upcoming_appointments': upcoming_appointments,
@@ -166,7 +166,7 @@ def patients_list(request):
         patients = patients.filter(
             Q(name__icontains=search_query) |
             Q(contact__icontains=search_query) |
-            Q(patient_id__icontains=search_query)
+            Q(PatientID__icontains=search_query)
         )
     
     context = {
@@ -179,7 +179,7 @@ def patients_list(request):
 
 
 @login_required
-def patient_detail(request, patient_id):
+def patient_detail(request, PatientID):
     try:
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
@@ -187,7 +187,7 @@ def patient_detail(request, patient_id):
         messages.error(request, 'User profile not found')
         return redirect('login')
     
-    patient = get_object_or_404(Patient, patient_id=patient_id)
+    patient = get_object_or_404(Patient, PatientID=PatientID)
     appointments = Appointment.objects.filter(patient=patient).select_related('doctor').order_by('-appointment_date')
     
     context = {
@@ -229,7 +229,7 @@ def appointments_list(request):
 
 
 @login_required
-def appointment_detail(request, appointment_id):
+def appointment_detail(request, AppointmentID):
     try:
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
@@ -237,7 +237,7 @@ def appointment_detail(request, appointment_id):
         messages.error(request, 'User profile not found')
         return redirect('login')
     
-    appointment = get_object_or_404(Appointment, appointment_id=appointment_id)
+    appointment = get_object_or_404(Appointment, AppointmentID=AppointmentID)
     
     # Check if doctor can only see their own appointments
     if role == 'Doctor' and appointment.doctor != hospital_user.doctor:
@@ -277,14 +277,14 @@ def add_appointment(request):
         return redirect('login')
     
     if request.method == 'POST':
-        patient_id = request.POST.get('patient_id')
-        doctor_id = request.POST.get('doctor_id')
+        PatientID = request.POST.get('PatientID')
+        DoctorID = request.POST.get('DoctorID')
         appointment_date = request.POST.get('appointment_date')
         appointment_time = request.POST.get('appointment_time')
         
         try:
-            patient = Patient.objects.get(patient_id=patient_id)
-            doctor = Doctor.objects.get(doctor_id=doctor_id)
+            patient = Patient.objects.get(PatientID=PatientID)
+            doctor = Doctor.objects.get(DoctorID=DoctorID)
             
             appointment = Appointment.objects.create(
                 patient=patient,
@@ -295,7 +295,7 @@ def add_appointment(request):
             )
             
             messages.success(request, 'Appointment created successfully')
-            return redirect('appointment_detail', appointment_id=appointment.appointment_id)
+            return redirect('appointment_detail', AppointmentID=appointment.AppointmentID)
             
         except (Patient.DoesNotExist, Doctor.DoesNotExist):
             messages.error(request, 'Invalid patient or doctor selected')
@@ -313,9 +313,9 @@ def add_appointment(request):
 
 
 @login_required
-def update_appointment_status(request, appointment_id):
+def update_appointment_status(request, AppointmentID):
     if request.method == 'POST':
-        appointment = get_object_or_404(Appointment, appointment_id=appointment_id)
+        appointment = get_object_or_404(Appointment, AppointmentID=AppointmentID)
         new_status = request.POST.get('status')
         
         if new_status in ['Scheduled', 'Completed', 'Cancelled']:
@@ -325,7 +325,7 @@ def update_appointment_status(request, appointment_id):
         else:
             messages.error(request, 'Invalid status')
     
-    return redirect('appointment_detail', appointment_id=appointment_id)
+    return redirect('appointment_detail', AppointmentID=AppointmentID)
 
 
 @login_required
@@ -354,9 +354,9 @@ def billing_list(request):
 
 
 @login_required
-def update_payment_status(request, bill_id):
+def update_payment_status(request, BillID):
     if request.method == 'POST':
-        bill = get_object_or_404(Billing, bill_id=bill_id)
+        bill = get_object_or_404(Billing, BillID=BillID)
         new_status = request.POST.get('payment_status')
         payment_method = request.POST.get('payment_method')
         
@@ -374,9 +374,9 @@ def update_payment_status(request, bill_id):
 
 # API endpoints for AJAX calls
 @login_required
-def get_patient_data(request, patient_id):
+def get_patient_data(request, PatientID):
     try:
-        patient = Patient.objects.get(patient_id=patient_id)
+        patient = Patient.objects.get(PatientID=PatientID)
         data = {
             'name': patient.name,
             'gender': patient.gender,
@@ -390,9 +390,9 @@ def get_patient_data(request, patient_id):
 
 
 @login_required
-def get_doctor_schedule(request, doctor_id, date):
+def get_doctor_schedule(request, DoctorID, date):
     try:
-        doctor = Doctor.objects.get(doctor_id=doctor_id)
+        doctor = Doctor.objects.get(DoctorID=DoctorID)
         appointments = Appointment.objects.filter(
             doctor=doctor,
             appointment_date=date,
@@ -434,7 +434,7 @@ def add_patient(request):
                 blood_group=blood_group
             )
             messages.success(request, f'Patient {patient.name} added successfully')
-            return redirect('patient_detail', patient_id=patient.patient_id)
+            return redirect('patient_detail', PatientID=patient.PatientID)
         except Exception as e:
             messages.error(request, f'Error adding patient: {str(e)}')
     
@@ -442,7 +442,7 @@ def add_patient(request):
 
 
 @login_required
-def edit_patient(request, patient_id):
+def edit_patient(request, PatientID):
     try:
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
@@ -454,7 +454,7 @@ def edit_patient(request, patient_id):
         messages.error(request, 'You do not have permission to edit patients')
         return redirect('patients_list')
     
-    patient = get_object_or_404(Patient, patient_id=patient_id)
+    patient = get_object_or_404(Patient, PatientID=PatientID)
     
     if request.method == 'POST':
         patient.name = request.POST.get('name')
@@ -466,15 +466,15 @@ def edit_patient(request, patient_id):
         try:
             patient.save()
             messages.success(request, f'Patient {patient.name} updated successfully')
-            return redirect('patient_detail', patient_id=patient.patient_id)
+            return redirect('patient_detail', PatientID=patient.PatientID)
         except Exception as e:
             messages.error(request, f'Error updating patient: {str(e)}')
     
-    return redirect('patient_detail', patient_id=patient_id)
+    return redirect('patient_detail', PatientID=PatientID)
 
 
 @login_required
-def delete_patient(request, patient_id):
+def delete_patient(request, PatientID):
     try:
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
@@ -486,7 +486,7 @@ def delete_patient(request, patient_id):
         messages.error(request, 'Only administrators can delete patients')
         return redirect('patients_list')
     
-    patient = get_object_or_404(Patient, patient_id=patient_id)
+    patient = get_object_or_404(Patient, PatientID=PatientID)
     
     if request.method == 'POST':
         try:
@@ -500,7 +500,7 @@ def delete_patient(request, patient_id):
 
 
 @login_required
-def add_treatment(request, appointment_id):
+def add_treatment(request, AppointmentID):
     try:
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
@@ -512,12 +512,12 @@ def add_treatment(request, appointment_id):
         messages.error(request, 'You do not have permission to add treatments')
         return redirect('appointments_list')
     
-    appointment = get_object_or_404(Appointment, appointment_id=appointment_id)
+    appointment = get_object_or_404(Appointment, AppointmentID=AppointmentID)
     
     # Check if doctor can only treat their own appointments
     if role == 'Doctor' and appointment.doctor != hospital_user.doctor:
         messages.error(request, 'You can only add treatments for your own appointments')
-        return redirect('appointment_detail', appointment_id=appointment_id)
+        return redirect('appointment_detail', AppointmentID=AppointmentID)
     
     if request.method == 'POST':
         diagnosis = request.POST.get('diagnosis')
@@ -538,8 +538,8 @@ def add_treatment(request, appointment_id):
                 treatment.save()
             
             messages.success(request, 'Treatment added successfully')
-            return redirect('appointment_detail', appointment_id=appointment_id)
+            return redirect('appointment_detail', AppointmentID=AppointmentID)
         except Exception as e:
             messages.error(request, f'Error adding treatment: {str(e)}')
     
-    return redirect('appointment_detail', appointment_id=appointment_id)
+    return redirect('appointment_detail', AppointmentID=AppointmentID)

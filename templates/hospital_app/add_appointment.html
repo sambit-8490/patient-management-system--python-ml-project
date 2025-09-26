@@ -26,12 +26,12 @@
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="patient_id" class="form-label">Select Patient *</label>
-                            <select class="form-select" id="patient_id" name="patient_id" required>
+                            <label for="PatientID" class="form-label">Select Patient *</label>
+                            <select class="form-select" id="PatientID" name="PatientID" required>
                                 <option value="">Choose a patient...</option>
                                 {% for patient in patients %}
-                                <option value="{{ patient.patient_id }}" {% if request.GET.patient_id == patient.patient_id|stringformat:"s" %}selected{% endif %}>
-                                    {{ patient.name }} (ID: {{ patient.patient_id }})
+                                <option value="{{ patient.PatientID }}" {% if request.GET.PatientID == patient.PatientID|stringformat:"s" %}selected{% endif %}>
+                                    {{ patient.name }} (ID: {{ patient.PatientID }})
                                 </option>
                                 {% endfor %}
                             </select>
@@ -41,11 +41,11 @@
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="doctor_id" class="form-label">Select Doctor *</label>
-                            <select class="form-select" id="doctor_id" name="doctor_id" required>
+                            <label for="DoctorID" class="form-label">Select Doctor *</label>
+                            <select class="form-select" id="DoctorID" name="DoctorID" required>
                                 <option value="">Choose a doctor...</option>
                                 {% for doctor in doctors %}
-                                <option value="{{ doctor.doctor_id }}">
+                                <option value="{{ doctor.DoctorID }}">
                                     Dr. {{ doctor.name }} - {{ doctor.specialization }}
                                 </option>
                                 {% endfor %}
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle patient selection
-    var patientSelect = document.getElementById('patient_id');
+    var patientSelect = document.getElementById('PatientID');
     if (patientSelect) {
         patientSelect.addEventListener('change', function() {
             var patientId = this.value;
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle doctor and date selection for time slot checking
-    var doctorSelect = document.getElementById('doctor_id');
+    var doctorSelect = document.getElementById('DoctorID');
     var timeSelect = document.getElementById('appointment_time');
     
     function checkAvailability() {
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     // Add new patient to select dropdown
-                    var option = new Option(data.patient.name + ' (ID: ' + data.patient.patient_id + ')', data.patient.patient_id, true, true);
+                    var option = new Option(data.patient.name + ' (ID: ' + data.patient.PatientID + ')', data.patient.PatientID, true, true);
                     patientSelect.add(option);
                     
                     // Close modal
@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+
 
 
 

@@ -13,36 +13,40 @@ A comprehensive Django-based Patient Management System with role-based access co
 ### 👥 **User Management**
 - Role-based authentication (Admin, Doctor, Staff, Patient)
 - Secure login system with session management
-- User profile management
+- User profile management with HospitalUser model
+- Automated demo user creation
 
 ### 🏥 **Patient Management**
 - Patient registration and profile management
 - Medical history tracking
 - Contact information and blood group management
 - Patient search and filtering
+- Add/Edit/Delete patient functionality
 
 ### 📅 **Appointment System**
 - Appointment scheduling and management
 - Doctor availability checking
 - Appointment status tracking (Scheduled, Completed, Cancelled)
 - Time slot management
+- Treatment documentation for appointments
 
 ### 💊 **Medical Records**
-- Treatment documentation
-- Diagnosis recording
-- Prescription management
-- Medication tracking
+- Treatment documentation with diagnosis and notes
+- Prescription management with medication details
+- Medication tracking with dosage and manufacturer info
+- Medical history per patient
 
 ### 💰 **Billing System**
 - Bill generation and management
-- Payment status tracking
-- Payment method recording
+- Payment status tracking (Paid, Pending)
+- Payment method recording (Card, Cash, UPI, Insurance)
 - Financial reporting
+- Billing constraints (only for completed appointments)
 
 ### 📊 **Analytics & Reporting**
-- Dashboard with key metrics
-- Chart visualizations
-- Export functionality (CSV)
+- Dashboard with key metrics and charts
+- Real-time statistics
+- Export functionality
 - Print-friendly reports
 
 ## Technology Stack
@@ -52,74 +56,81 @@ A comprehensive Django-based Patient Management System with role-based access co
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Charts**: Chart.js
 - **Icons**: Font Awesome 6
+- **Styling**: Custom CSS with medical-themed design
 
-## Installation & Setup
+## Quick Start
+
+### Option 1: Automated Setup (Recommended)
+
+**For Windows:**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd Patient-Management-System-1
+
+# Run the automated setup script
+run_server.bat
+```
+
+**For Linux/Mac:**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd Patient-Management-System-1
+
+# Make script executable and run
+chmod +x run_server.sh
+./run_server.sh
+```
+
+The automated script will:
+- Create virtual environment
+- Install dependencies
+- Run database migrations
+- Prompt for creating users via interactive `create_users.py`
+- Load sample data
+- Start development server
+
+### Option 2: Manual Setup
 
 ### Prerequisites
 - Python 3.8+
-- MySQL 5.7+
 - pip (Python package manager)
 
-### 1. Clone the Repository
+### 1. Clone and Setup
 ```bash
 git clone <repository-url>
 cd Patient-Management-System-1
-```
 
-### 2. Create Virtual Environment
-```bash
+# Create virtual environment
 python -m venv venv
 
-# On Windows
+# Activate virtual environment
+# Windows:
 venv\Scripts\activate
-
-# On macOS/Linux
+# macOS/Linux:
 source venv/bin/activate
-```
 
-### 3. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Database Setup
-1. Create MySQL database:
-```sql
-CREATE DATABASE PatientManagementDB;
-```
-
-2. Update database settings in `patient_management/settings.py`:
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'PatientManagementDB',
-        'USER': 'your_username',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
-}
-```
-
-3. Run migrations:
+### 2. Database Setup
 ```bash
-python manage.py makemigrations
+# Run migrations
 python manage.py migrate
-```
 
-### 5. Create Superuser
-```bash
+# Create superuser
 python manage.py createsuperuser
+
+# Create users interactively (Admin/Doctor/Staff)
+python create_users.py
+
+# Load sample data
+python manage.py load_sample_data
 ```
 
-### 6. Load Sample Data (Optional)
-```bash
-# Run the SQL script to create sample data
-mysql -u your_username -p PatientManagementDB < HospitalManagementDB.sql
-```
-
-### 7. Run Development Server
+### 3. Start Server
 ```bash
 python manage.py runserver
 ```
@@ -128,10 +139,21 @@ Visit `http://127.0.0.1:8000` to access the application.
 
 ## Default Login Credentials
 
-### Demo Users (Create these in Django Admin)
-- **Admin**: admin/admin123
-- **Doctor**: doctor/doctor123  
-- **Staff**: staff/staff123
+### User Credentials Pattern
+- Username: normalized full name (letters/digits only, lowercase)
+- Password: `<normalized_name>123`
+- Example: "Dr. John Smith" -> username `drjohnsmith`, password `drjohnsmith123`
+
+## Sample Data
+
+The system comes with pre-loaded sample data including:
+- **10 Patients** with complete profiles
+- **8 Doctors** across different specializations
+- **10 Appointments** (8 completed, 2 scheduled)
+- **5 Treatments** with diagnoses
+- **8 Medications** with dosage information
+- **5 Prescriptions** linking treatments to medications
+- **8 Billing Records** for completed appointments
 
 ## Project Structure
 
@@ -140,6 +162,10 @@ Patient-Management-System-1/
 ├── manage.py
 ├── requirements.txt
 ├── README.md
+├── run_server.bat          # Windows setup script
+├── run_server.sh           # Linux/Mac setup script
+├── create_users.py         # Interactive user creation script
+├── MYSQL_SETUP.md          # MySQL setup guide (optional)
 ├── patient_management/
 │   ├── __init__.py
 │   ├── settings.py
@@ -151,7 +177,10 @@ Patient-Management-System-1/
 │   ├── models.py
 │   ├── views.py
 │   ├── urls.py
-│   └── apps.py
+│   ├── apps.py
+│   └── management/
+│       └── commands/
+│           └── load_sample_data.py
 ├── templates/
 │   ├── base.html
 │   └── hospital_app/
@@ -173,36 +202,108 @@ Patient-Management-System-1/
 └── HospitalManagementDB.sql
 ```
 
-## Usage Guide
+## Key Features by Role
 
 ### Admin Features
-- View complete system statistics
+- Complete system overview with statistics
 - Manage all patients, doctors, and appointments
 - Access billing and financial reports
-- System administration
+- System administration and user management
+- View comprehensive analytics dashboard
 
 ### Doctor Features
 - View assigned patients and appointments
-- Manage patient medical records
+- Manage patient medical records and treatments
 - Update appointment status
-- Access treatment history
+- Access treatment history and prescriptions
+- Patient diagnosis and medication management
 
 ### Staff Features
 - Schedule and manage appointments
-- Handle patient registration
+- Handle patient registration and updates
 - Process billing and payments
 - Manage appointment logistics
+- Add/edit/delete patient information
 
 ### Patient Features
 - View personal medical records
 - Check appointment history
 - Access prescription information
-- View billing details
+- View billing details and payment status
 
 ## API Endpoints
 
 - `GET /api/patient/<id>/` - Get patient data
 - `GET /api/doctor/<id>/schedule/<date>/` - Get doctor schedule
+
+## Database Configuration
+
+### SQLite (Default)
+No additional configuration required. Database file: `db.sqlite3`
+
+### MySQL (Optional)
+Update `patient_management/settings.py`:
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'PatientManagementDB',
+        'USER': 'your_username',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
+    }
+}
+```
+
+### MySQL Setup (Integrated)
+
+1. Install MySQL Server 8.x and start the MySQL service.
+   - Download from `https://dev.mysql.com/downloads/mysql/` or use XAMPP/WAMP.
+
+2. Create the database (from MySQL shell or Workbench):
+   ```sql
+   CREATE DATABASE PatientManagementDB;
+   ```
+
+3. (Optional) Import schema and sample data via the combined script:
+   ```bash
+   # From the project root
+   mysql -u root -p -h localhost -P 3306 PatientManagementDB < combined_schema_and_data.sql
+   ```
+
+4. Configure Django to use MySQL (see snippet above) and then apply migrations:
+   ```bash
+   python manage.py migrate
+   # If tables already exist, you can reconcile with
+   python manage.py migrate --fake-initial
+   ```
+
+5. Create users:
+   ```bash
+   python manage.py createsuperuser
+   python create_users.py   # Admin/Doctor/Staff interactively
+   ```
+
+Troubleshooting:
+- Access denied: verify credentials and MySQL is running.
+- `mysql` not found: add MySQL bin to PATH or run from MySQL Shell.
+- Database already exists: safe to ignore; proceed with migrations and `--fake-initial` if needed.
+
+## Management Commands
+
+### Load Sample Data
+```bash
+python manage.py load_sample_data
+```
+
+### Create Users (Interactive)
+```bash
+python create_users.py
+```
 
 ## Customization
 
@@ -210,11 +311,13 @@ Patient-Management-System-1/
 1. Update `ROLE_CHOICES` in `hospital_app/models.py`
 2. Create corresponding dashboard template
 3. Update view logic in `hospital_app/views.py`
+4. Add URL patterns in `hospital_app/urls.py`
 
 ### Styling
 - Modify `static/css/style.css` for custom styling
 - Update Bootstrap classes in templates
 - Add custom JavaScript in `static/js/main.js`
+- Login page features medical-themed green design
 
 ### Database Schema
 - Models are defined in `hospital_app/models.py`
@@ -228,6 +331,48 @@ Patient-Management-System-1/
 - Role-based access control
 - SQL injection prevention
 - XSS protection
+- Secure session management
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Login Issues**: Run `python create_users.py` to create users
+2. **No Data**: Run `python manage.py load_sample_data` to load sample data
+3. **Database Errors**: Run `python manage.py migrate` to apply migrations
+4. **Permission Errors**: Ensure proper role assignments in HospitalUser model
+
+### Reset Database
+```bash
+# Delete database file (SQLite)
+rm db.sqlite3
+
+# Recreate and migrate
+python manage.py migrate
+
+# Create users and load data
+python create_users.py
+python manage.py load_sample_data
+```
+
+## Getting Started (New Users)
+
+1. Install prerequisites: Python 3.9+, Git, and MySQL 8.x (optional; SQLite works by default).
+2. Clone and enter the project directory:
+   - `git clone <repository-url>`
+   - `cd Patient-Management-System-1`
+3. Create and activate a virtual environment, then install dependencies:
+   - Windows: `python -m venv venv && .\\venv\\Scripts\\activate && pip install -r requirements.txt`
+   - macOS/Linux: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+4. Database:
+   - SQLite (default): no setup required.
+   - MySQL: update `patient_management/settings.py` credentials or follow `MYSQL_SETUP.md`.
+5. Initialize the DB: `python manage.py migrate`.
+6. Create users:
+   - Superuser: `python manage.py createsuperuser`.
+   - Additional Admin/Doctor/Staff: `python create_users.py` (username derived from name; password `<normalized_name>123`).
+7. Optional sample data: `python manage.py load_sample_data`.
+8. Start the server: `python manage.py runserver` and open `http://127.0.0.1:8000`.
 
 ## Contributing
 
@@ -255,3 +400,6 @@ For support and questions, please contact the development team or create an issu
 - [ ] Integration with medical devices
 - [ ] Multi-language support
 - [ ] Advanced analytics dashboard
+- [ ] MySQL integration with proper authentication
+- [ ] Docker containerization
+- [ ] Automated testing suite

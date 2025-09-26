@@ -117,7 +117,7 @@
                                 </td>
                                 <td>
                                     <strong>{{ appointment.patient.name }}</strong><br>
-                                    <small class="text-muted">ID: {{ appointment.patient.patient_id }}</small>
+                                    <small class="text-muted">ID: {{ appointment.patient.PatientID }}</small>
                                 </td>
                                 <td>
                                     <strong>Dr. {{ appointment.doctor.name }}</strong><br>
@@ -129,7 +129,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{% url 'appointment_detail' appointment.appointment_id %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'appointment_detail' appointment.AppointmentID %}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -174,7 +174,7 @@
                             <tr>
                                 <td>
                                     <strong>{{ bill.appointment.patient.name }}</strong><br>
-                                    <small class="text-muted">ID: {{ bill.appointment.patient.patient_id }}</small>
+                                    <small class="text-muted">ID: {{ bill.appointment.patient.PatientID }}</small>
                                 </td>
                                 <td>
                                     <strong>${{ bill.amount }}</strong>
@@ -233,14 +233,14 @@
                         <tbody>
                             {% for patient in recent_patients %}
                             <tr>
-                                <td>{{ patient.patient_id }}</td>
+                                <td>{{ patient.PatientID }}</td>
                                 <td>{{ patient.name }}</td>
                                 <td>{{ patient.gender }}</td>
                                 <td>{{ patient.dob }}</td>
                                 <td>{{ patient.contact|default:"Not provided" }}</td>
                                 <td>{{ patient.blood_group|default:"N/A" }}</td>
                                 <td>
-                                    <a href="{% url 'patient_detail' patient.patient_id %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'patient_detail' patient.PatientID %}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -260,6 +260,7 @@
     </div>
 </div>
 {% endblock %}
+
 
 
 

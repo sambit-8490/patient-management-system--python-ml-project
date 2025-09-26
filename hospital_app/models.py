@@ -21,7 +21,7 @@ class Patient(models.Model):
         ('O-', 'O-'),
     ]
     
-    patient_id = models.AutoField(primary_key=True)
+    PatientID = models.AutoField(primary_key=True, db_column='PatientID')
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     dob = models.DateField()
@@ -29,14 +29,15 @@ class Patient(models.Model):
     blood_group = models.CharField(max_length=5, choices=BLOOD_GROUP_CHOICES, blank=True, null=True)
     
     def __str__(self):
-        return f"{self.name} (ID: {self.patient_id})"
+        return f"{self.name} (ID: {self.PatientID})"
     
     class Meta:
         db_table = 'Patients'
+        managed = False
 
 
 class Doctor(models.Model):
-    doctor_id = models.AutoField(primary_key=True)
+    DoctorID = models.AutoField(primary_key=True, db_column='DoctorID')
     name = models.CharField(max_length=100)
     specialization = models.CharField(max_length=100)
     contact = models.CharField(max_length=50, blank=True, null=True)
@@ -46,6 +47,7 @@ class Doctor(models.Model):
     
     class Meta:
         db_table = 'Doctors'
+        managed = False
 
 
 class HospitalUser(models.Model):
@@ -65,6 +67,7 @@ class HospitalUser(models.Model):
     
     class Meta:
         db_table = 'Users'
+        managed = False
 
 
 class Appointment(models.Model):
@@ -74,7 +77,7 @@ class Appointment(models.Model):
         ('Cancelled', 'Cancelled'),
     ]
     
-    appointment_id = models.AutoField(primary_key=True)
+    AppointmentID = models.AutoField(primary_key=True, db_column='AppointmentID')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     appointment_date = models.DateField()
@@ -82,14 +85,15 @@ class Appointment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Scheduled')
     
     def __str__(self):
-        return f"Appointment {self.appointment_id} - {self.patient.name} with Dr. {self.doctor.name}"
+        return f"Appointment {self.AppointmentID} - {self.patient.name} with Dr. {self.doctor.name}"
     
     class Meta:
         db_table = 'Appointments'
+        managed = False
 
 
 class Treatment(models.Model):
-    treatment_id = models.AutoField(primary_key=True)
+    TreatmentID = models.AutoField(primary_key=True, db_column='TreatmentID')
     appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     diagnosis = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
@@ -99,10 +103,11 @@ class Treatment(models.Model):
     
     class Meta:
         db_table = 'Treatments'
+        managed = False
 
 
 class Medication(models.Model):
-    medication_id = models.AutoField(primary_key=True)
+    MedicationID = models.AutoField(primary_key=True, db_column='MedicationID')
     name = models.CharField(max_length=100, unique=True)
     dosage = models.CharField(max_length=50, blank=True, null=True)
     manufacturer = models.CharField(max_length=100, blank=True, null=True)
@@ -112,10 +117,11 @@ class Medication(models.Model):
     
     class Meta:
         db_table = 'Medications'
+        managed = False
 
 
 class Prescription(models.Model):
-    prescription_id = models.AutoField(primary_key=True)
+    PrescriptionID = models.AutoField(primary_key=True, db_column='PrescriptionID')
     treatment = models.ForeignKey(Treatment, on_delete=models.CASCADE)
     medication = models.ForeignKey(Medication, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -127,6 +133,7 @@ class Prescription(models.Model):
     
     class Meta:
         db_table = 'Prescriptions'
+        managed = False
 
 
 class Billing(models.Model):
@@ -143,7 +150,7 @@ class Billing(models.Model):
         ('Insurance', 'Insurance'),
     ]
     
-    bill_id = models.AutoField(primary_key=True)
+    BillID = models.AutoField(primary_key=True, db_column='BillID')
     appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
@@ -151,7 +158,8 @@ class Billing(models.Model):
     billing_date = models.DateField()
     
     def __str__(self):
-        return f"Bill {self.bill_id} - {self.appointment.patient.name} - ${self.amount}"
+        return f"Bill {self.BillID} - {self.appointment.patient.name} - ${self.amount}"
     
     class Meta:
         db_table = 'Billing'
+        managed = False

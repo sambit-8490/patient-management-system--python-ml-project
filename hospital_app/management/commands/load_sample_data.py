@@ -117,7 +117,7 @@ class Command(BaseCommand):
             )
             treatments.append(treatment)
             if created:
-                self.stdout.write(f'Created treatment for appointment {appointment.appointment_id}')
+                self.stdout.write(f'Created treatment for appointment {appointment.AppointmentID}')
         
         # Create sample medications
         medications_data = [
@@ -189,7 +189,7 @@ class Command(BaseCommand):
                 }
             )
             if created:
-                self.stdout.write(f'Created billing for appointment {appointment.appointment_id}: ${amount}')
+                self.stdout.write(f'Created billing for appointment {appointment.AppointmentID}: ${amount}')
         
         self.stdout.write(
             self.style.SUCCESS('Successfully loaded sample data!')

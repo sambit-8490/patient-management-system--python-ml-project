@@ -79,10 +79,10 @@
                         <tbody>
                             {% for appointment in appointments %}
                             <tr>
-                                <td>{{ appointment.appointment_id }}</td>
+                                <td>{{ appointment.AppointmentID }}</td>
                                 <td>
                                     <strong>{{ appointment.patient.name }}</strong><br>
-                                    <small class="text-muted">ID: {{ appointment.patient.patient_id }}</small>
+                                    <small class="text-muted">ID: {{ appointment.patient.PatientID }}</small>
                                 </td>
                                 <td>
                                     <strong>Dr. {{ appointment.doctor.name }}</strong><br>
@@ -96,7 +96,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{% url 'appointment_detail' appointment.appointment_id %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'appointment_detail' appointment.AppointmentID %}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -122,6 +122,7 @@
     </div>
 </div>
 {% endblock %}
+
 
 
 

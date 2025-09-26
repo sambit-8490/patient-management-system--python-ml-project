@@ -165,10 +165,10 @@
                         <tbody>
                             {% for bill in bills %}
                             <tr>
-                                <td>{{ bill.bill_id }}</td>
+                                <td>{{ bill.BillID }}</td>
                                 <td>
                                     <strong>{{ bill.appointment.patient.name }}</strong><br>
-                                    <small class="text-muted">ID: {{ bill.appointment.patient.patient_id }}</small>
+                                    <small class="text-muted">ID: {{ bill.appointment.patient.PatientID }}</small>
                                 </td>
                                 <td>
                                     <strong>Dr. {{ bill.appointment.doctor.name }}</strong><br>
@@ -187,10 +187,10 @@
                                 <td>{{ bill.billing_date }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updatePaymentModal{{ bill.bill_id }}">
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updatePaymentModal{{ bill.BillID }}">
                                             <i class="fas fa-edit"></i> Update
                                         </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="printBill({{ bill.bill_id }})">
+                                        <button class="btn btn-sm btn-outline-info" onclick="printBill({{ bill.BillID }})">
                                             <i class="fas fa-print"></i> Print
                                         </button>
                                     </div>
@@ -219,27 +219,27 @@
 
 <!-- Update Payment Status Modals -->
 {% for bill in bills %}
-<div class="modal fade" id="updatePaymentModal{{ bill.bill_id }}" tabindex="-1">
+<div class="modal fade" id="updatePaymentModal{{ bill.BillID }}" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Update Payment Status</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'update_payment_status' bill.bill_id %}">
+            <form method="post" action="{% url 'update_payment_status' bill.BillID %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="payment_status{{ bill.bill_id }}" class="form-label">Payment Status</label>
-                        <select class="form-select" id="payment_status{{ bill.bill_id }}" name="payment_status" required>
+                        <label for="payment_status{{ bill.BillID }}" class="form-label">Payment Status</label>
+                        <select class="form-select" id="payment_status{{ bill.BillID }}" name="payment_status" required>
                             <option value="Paid" {% if bill.payment_status == 'Paid' %}selected{% endif %}>Paid</option>
                             <option value="Pending" {% if bill.payment_status == 'Pending' %}selected{% endif %}>Pending</option>
                             <option value="Cancelled" {% if bill.payment_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="payment_method{{ bill.bill_id }}" class="form-label">Payment Method</label>
-                        <select class="form-select" id="payment_method{{ bill.bill_id }}" name="payment_method">
+                        <label for="payment_method{{ bill.BillID }}" class="form-label">Payment Method</label>
+                        <select class="form-select" id="payment_method{{ bill.BillID }}" name="payment_method">
                             <option value="">Select Payment Method</option>
                             <option value="Cash" {% if bill.payment_method == 'Cash' %}selected{% endif %}>Cash</option>
                             <option value="Card" {% if bill.payment_method == 'Card' %}selected{% endif %}>Card</option>
@@ -314,6 +314,7 @@ function exportToCSV(headers, data) {
 }
 </script>
 {% endblock %}
+
 
 
 

@@ -26,7 +26,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h6 class="text-primary">Personal Details</h6>
-                        <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
+                        <p><strong>Patient ID:</strong> {{ patient.PatientID }}</p>
                         <p><strong>Name:</strong> {{ patient.name }}</p>
                         <p><strong>Gender:</strong> 
                             <span class="badge bg-{% if patient.gender == 'Male' %}primary{% elif patient.gender == 'Female' %}danger{% else %}secondary{% endif %}">
@@ -61,7 +61,7 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {% if role == 'Admin' or role == 'Staff' %}
-                    <a href="{% url 'add_appointment' %}?patient_id={{ patient.patient_id }}" class="btn btn-primary">
+                    <a href="{% url 'add_appointment' %}?PatientID={{ patient.PatientID }}" class="btn btn-primary">
                         <i class="fas fa-calendar-plus"></i> Schedule Appointment
                     </a>
                     {% endif %}
@@ -103,7 +103,7 @@
                         <tbody>
                             {% for appointment in appointments %}
                             <tr>
-                                <td>{{ appointment.appointment_id }}</td>
+                                <td>{{ appointment.AppointmentID }}</td>
                                 <td>
                                     <strong>Dr. {{ appointment.doctor.name }}</strong><br>
                                     <small class="text-muted">{{ appointment.doctor.specialization }}</small>
@@ -116,7 +116,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{% url 'appointment_detail' appointment.appointment_id %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'appointment_detail' appointment.AppointmentID %}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -146,7 +146,7 @@
                 <h5 class="modal-title">Edit Patient Information</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'edit_patient' patient.patient_id %}">
+            <form method="post" action="{% url 'edit_patient' patient.PatientID %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="row">
@@ -200,6 +200,7 @@
 </div>
 {% endif %}
 {% endblock %}
+
 
 
 

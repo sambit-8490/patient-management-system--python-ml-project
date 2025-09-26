@@ -27,7 +27,7 @@
                     <div class="col-md-6">
                         <h6 class="text-primary">Patient Details</h6>
                         <p><strong>Name:</strong> {{ appointment.patient.name }}</p>
-                        <p><strong>Patient ID:</strong> {{ appointment.patient.patient_id }}</p>
+                        <p><strong>Patient ID:</strong> {{ appointment.patient.PatientID }}</p>
                         <p><strong>Gender:</strong> {{ appointment.patient.gender }}</p>
                         <p><strong>Date of Birth:</strong> {{ appointment.patient.dob }}</p>
                         <p><strong>Contact:</strong> {{ appointment.patient.contact|default:"Not provided" }}</p>
@@ -54,7 +54,7 @@
                 {% if role == 'Admin' or role == 'Staff' or role == 'Doctor' %}
                 <hr>
                 <h6 class="text-primary">Update Status</h6>
-                <form method="post" action="{% url 'update_appointment_status' appointment.appointment_id %}">
+                <form method="post" action="{% url 'update_appointment_status' appointment.AppointmentID %}">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-6">
@@ -84,7 +84,7 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="{% url 'patient_detail' appointment.patient.patient_id %}" class="btn btn-outline-primary">
+                    <a href="{% url 'patient_detail' appointment.patient.PatientID %}" class="btn btn-outline-primary">
                         <i class="fas fa-user"></i> View Patient Profile
                     </a>
                     {% if billing %}
@@ -108,7 +108,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Billing Information</h6>
             </div>
             <div class="card-body">
-                <p><strong>Bill ID:</strong> {{ billing.bill_id }}</p>
+                <p><strong>Bill ID:</strong> {{ billing.BillID }}</p>
                 <p><strong>Amount:</strong> ${{ billing.amount }}</p>
                 <p><strong>Status:</strong> 
                     <span class="badge bg-{% if billing.payment_status == 'Paid' %}success{% elif billing.payment_status == 'Pending' %}warning{% else %}danger{% endif %}">
@@ -185,7 +185,7 @@
                 <h5 class="modal-title">Add Treatment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'add_treatment' appointment.appointment_id %}">
+            <form method="post" action="{% url 'add_treatment' appointment.AppointmentID %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
@@ -207,6 +207,7 @@
 </div>
 {% endif %}
 {% endblock %}
+
 
 
 
