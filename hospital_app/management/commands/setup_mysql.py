@@ -1,74 +1,58 @@
 #!/usr/bin/env python
-"""
-Django management command to setup MySQL database
-Run with: python manage.py setup_mysql
-"""
-
-from django.core.management.base import BaseCommand
-from django.db import connection
 import os
+from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
+from django.db import connection
+
 
 class Command(BaseCommand):
-    help = 'Setup MySQL database with tables and sample data'
+    help = "Initialize MySQL schema and data from combined_schema_and_data.sql"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--sql-file',
+            default='combined_schema_and_data.sql',
+            help='Path to SQL file relative to project root',
+        )
 
     def handle(self, *args, **options):
-        self.stdout.write('Setting up MySQL database...')
-        
-        try:
-            with connection.cursor() as cursor:
-                # Create database
-                self.stdout.write('Creating database PatientManagementDB...')
-                cursor.execute("CREATE DATABASE IF NOT EXISTS PatientManagementDB")
-                cursor.execute("USE PatientManagementDB")
-                
-                # Read and execute clean_hospital_schema.sql
-                self.stdout.write('Creating tables from clean_hospital_schema.sql...')
-                if os.path.exists('clean_hospital_schema.sql'):
-                    with open('clean_hospital_schema.sql', 'r', encoding='utf-8') as file:
-                        sql_content = file.read()
-                        
-                    # Split by semicolon and execute each statement
-                    statements = sql_content.split(';')
-                    for statement in statements:
-                        statement = statement.strip()
-                        if statement and not statement.startswith('--') and statement:
-                            try:
-                                cursor.execute(statement)
-                            except Exception as e:
-                                if "already exists" not in str(e) and "Duplicate entry" not in str(e):
-                                    self.stdout.write(f"Warning: {e}")
-                    
-                    self.stdout.write('Tables created successfully!')
-                else:
-                    self.stdout.write('clean_hospital_schema.sql not found!')
-                
-                # Read and execute clean_sample_data.sql
-                self.stdout.write('Loading sample data from clean_sample_data.sql...')
-                if os.path.exists('clean_sample_data.sql'):
-                    with open('clean_sample_data.sql', 'r', encoding='utf-8') as file:
-                        sample_sql = file.read()
-                        
-                    # Split by semicolon and execute each statement
-                    sample_statements = sample_sql.split(';')
-                    for statement in sample_statements:
-                        statement = statement.strip()
-                        if statement and not statement.startswith('--') and statement:
-                            try:
-                                cursor.execute(statement)
-                            except Exception as e:
-                                if "already exists" not in str(e) and "Duplicate entry" not in str(e):
-                                    self.stdout.write(f"Warning: {e}")
-                    
-                    self.stdout.write('Sample data loaded successfully!')
-                else:
-                    self.stdout.write('clean_sample_data.sql not found!')
-                
-                self.stdout.write(
-                    self.style.SUCCESS('MySQL database setup completed!')
-                )
-                
-        except Exception as e:
-            self.stdout.write(
-                self.style.ERROR(f'Error setting up MySQL: {e}')
-            )
-            self.stdout.write('Please ensure MySQL is running and accessible.')
+        sql_rel_path = options['sql_file']
+        sql_path = os.path.join(settings.BASE_DIR, sql_rel_path)
+
+        if not os.path.exists(sql_path):
+            raise CommandError(f"SQL file not found: {sql_path}")
+
+        self.stdout.write(f"Reading SQL from: {sql_path}")
+        with open(sql_path, 'r', encoding='utf-8') as f:
+            raw_sql = f.read()
+
+        # Remove comment lines and accumulate statements split by semicolons
+        statements = []
+        current = []
+        for line in raw_sql.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith('--'):
+                continue
+            current.append(stripped)
+            if stripped.endswith(';'):
+                stmt = ' '.join(current).rstrip(';')
+                statements.append(stmt)
+                current = []
+        if current:
+            statements.append(' '.join(current))
+
+        executed = 0
+        with connection.cursor() as cursor:
+            for stmt in statements:
+                try:
+                    cursor.execute(stmt)
+                    executed += 1
+                except Exception as e:
+                    # Log and continue so a single failure doesn't stop all
+                    self.stdout.write(self.style.WARNING(
+                        f"Failed statement: {stmt[:120]}...\nError: {e}"
+                    ))
+
+        self.stdout.write(self.style.SUCCESS(
+            f"Completed MySQL setup. Executed {executed} statements from {sql_rel_path}."
+        ))

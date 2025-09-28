@@ -24,7 +24,7 @@ python -c "import mysql.connector; mysql.connector.connect(host='localhost', use
 if %errorlevel% neq 0 (
     echo ERROR: Cannot connect to MySQL database!
     echo Please ensure MySQL is running and the database 'PatientManagementDB' exists.
-    echo You can create the database using the clean_hospital_schema.sql file.
+    echo You can create the database using the combined_schema_and_data.sql file.
     pause
     exit /b 1
 )
@@ -42,14 +42,11 @@ REM Create superuser if it doesn't exist
 echo Creating superuser (if not exists)...
 python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')"
 
-REM Create demo users with HospitalUser profiles
-echo Creating demo users...
-python manage.py create_demo_users
-python create_demo_users.py
+REM Create doctors' Django users and link HospitalUser profiles
+echo Creating and linking doctor users...
+python manage.py link_doctors_to_users
 
-REM Load sample data
-echo Loading sample data...
-python manage.py load_sample_data
+REM Skipping sample data loading per configuration
 
 REM Start server
 echo Starting Django development server...

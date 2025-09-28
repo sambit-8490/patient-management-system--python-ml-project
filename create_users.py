@@ -15,6 +15,7 @@ Run with:
 import os
 import re
 import sys
+from typing import List, Tuple
 
 
 def _bootstrap_django() -> None:
@@ -135,6 +136,94 @@ def create_staff(staff_full_name: str, email: str = "") -> tuple[str, str]:
     return username, password
 
 
+def list_session_credentials(session_creds: List[Tuple[str, str, str]]) -> None:
+    if not session_creds:
+        print("\nNo credentials created in this session yet.\n")
+        return
+    print("\n=== Credentials Created in This Session ===")
+    for role, username, password in session_creds:
+        print(f"- {role}: username='{username}'  password='{password}'")
+    print("")
+
+
+def list_all_credentials() -> None:
+    """Show all user login credentials (username and default password rule).
+
+    Notes:
+    - Passwords are stored hashed; we cannot read actual passwords.
+    - We show the default password based on the rule '<username>123'.
+    - If the password was changed later, the default may not work.
+    """
+    _bootstrap_django()
+    from hospital_app.models import HospitalUser
+
+    profiles = HospitalUser.objects.select_related('user', 'doctor').all()
+    if not profiles:
+        print("\nNo HospitalUser profiles found in the database.\n")
+        return
+
+    print("\n=== All User Credentials (by default rule) ===")
+    print("Note: If passwords were changed, the defaults below may not work.\n")
+    for p in profiles:
+        username = p.user.username
+        role = p.role
+        default_password = f"{username}123"
+        line = f"- {role}: username='{username}'  default_password='{default_password}'"
+        # For doctors, also show normalized from doctor name if it differs
+        if p.doctor is not None:
+            doc_username = _normalize_username(p.doctor.name)
+            if doc_username != username:
+                line += f"  (doctor_name_normalized='{doc_username}' -> '{doc_username}123')"
+        print(line)
+    print("")
+
+
+def delete_credentials_by_username() -> None:
+    """Delete a user's login credentials (Django User) by username.
+    Also deletes the associated HospitalUser profile if present.
+    Doctor records are NOT deleted.
+    """
+    _bootstrap_django()
+    from django.contrib.auth.models import User
+    from hospital_app.models import HospitalUser
+
+    username = input("Enter the username to delete: ").strip()
+    if not username:
+        print("Username cannot be empty.\n")
+        return
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        print(f"\nUser '{username}' does not exist.\n")
+        return
+
+    # Fetch role if HospitalUser exists
+    try:
+        profile = HospitalUser.objects.get(user=user)
+        role = profile.role
+    except HospitalUser.DoesNotExist:
+        profile = None
+        role = '(no profile)'
+
+    print("\nUser found:")
+    print(f"- username: {user.username}")
+    print(f"- role: {role}")
+    if user.is_superuser:
+        print("- WARNING: This is a superuser account.")
+
+    confirm = input("Type 'DELETE' to confirm deletion: ").strip()
+    if confirm != 'DELETE':
+        print("Deletion cancelled.\n")
+        return
+
+    # Delete HospitalUser first (if exists), then the auth user
+    if profile:
+        profile.delete()
+    user.delete()
+    print(f"\n✓ Deleted credentials for '{username}'. HospitalUser profile removed if present.\n")
+
+
 def _prompt_non_empty(prompt: str) -> str:
     while True:
         value = input(prompt).strip()
@@ -145,20 +234,25 @@ def _prompt_non_empty(prompt: str) -> str:
 
 def main() -> None:
     print("\n=== Patient Management System: Create Users ===\n")
+    session_created: List[Tuple[str, str, str]] = []  # (role, username, password)
     while True:
         print("Choose an option:")
         print("  1) Create Admin")
         print("  2) Create Doctor")
         print("  3) Create Staff")
-        print("  4) Exit")
+        print("  4) Show session-created credentials")
+        print("  5) Show ALL user credentials (default rule)")
+        print("  6) Delete credentials by username")
+        print("  7) Exit")
 
-        choice = input("Enter choice [1-4]: ").strip()
+        choice = input("Enter choice [1-7]: ").strip()
 
         if choice == '1':
             full_name = _prompt_non_empty("Admin full name: ")
             email = input("Email (optional): ").strip()
             username, password = create_admin(full_name, email=email)
             print(f"\n✓ Admin created/exists -> username: {username}  password: {password}\n")
+            session_created.append(("Admin", username, password))
 
         elif choice == '2':
             full_name = _prompt_non_empty("Doctor full name: ")
@@ -167,18 +261,29 @@ def main() -> None:
             email = input("Email (optional): ").strip()
             username, password = create_doctor(full_name, specialization, contact=contact, email=email)
             print(f"\n✓ Doctor created/exists -> username: {username}  password: {password}\n")
+            session_created.append(("Doctor", username, password))
 
         elif choice == '3':
             full_name = _prompt_non_empty("Staff full name: ")
             email = input("Email (optional): ").strip()
             username, password = create_staff(full_name, email=email)
             print(f"\n✓ Staff created/exists -> username: {username}  password: {password}\n")
+            session_created.append(("Staff", username, password))
 
         elif choice == '4':
+            list_session_credentials(session_created)
+
+        elif choice == '5':
+            list_all_credentials()
+
+        elif choice == '6':
+            delete_credentials_by_username()
+
+        elif choice == '7':
             print("Goodbye!")
             return
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.\n")
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.\n")
 
 
 if __name__ == "__main__":
@@ -186,5 +291,3 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("\nInterrupted. Exiting.")
-
-

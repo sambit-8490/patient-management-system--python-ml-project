@@ -25,12 +25,6 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            # Validate HospitalUser profile to prevent redirect loops
-            hospital_user = HospitalUser.objects.filter(user=user).first()
-            if not hospital_user or hospital_user.role not in ('Admin', 'Doctor', 'Staff'):
-                logout(request)
-                messages.error(request, 'User profile not found or invalid role. Please contact administrator.')
-                return redirect('login')
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password')
@@ -49,8 +43,6 @@ def dashboard(request):
         hospital_user = HospitalUser.objects.get(user=request.user)
         role = hospital_user.role
     except HospitalUser.DoesNotExist:
-        # Break potential login↔dashboard redirect loop by logging out
-        logout(request)
         messages.error(request, 'User profile not found. Please contact administrator.')
         return redirect('login')
     
@@ -63,8 +55,6 @@ def dashboard(request):
     elif role == 'Staff':
         return staff_dashboard(request, context)
     else:
-        # Invalid role: logout to avoid redirect loop
-        logout(request)
         messages.error(request, 'Invalid user role')
         return redirect('login')
 

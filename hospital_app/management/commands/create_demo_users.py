@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+import re
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from hospital_app.models import HospitalUser, Doctor
 
 
 class Command(BaseCommand):
-    help = 'Create demo users (admin/doctor/staff) and associated HospitalUser profiles and Doctor records.'
+    help = 'Create admin user and link ALL doctors in DB to Django users (no hardcoded demo users)'
 
     def handle(self, *args, **options):
-        self.stdout.write('Creating demo users...')
+        self.stdout.write('Creating admin (if missing) and linking all doctors to users...')
 
         # Admin user
         admin_user, created = User.objects.get_or_create(
@@ -37,83 +38,52 @@ class Command(BaseCommand):
         else:
             self.stdout.write('✓ Admin HospitalUser profile already exists')
 
-        # Doctor record(s)
-        doctor_record, dr_created = Doctor.objects.get_or_create(
-            name='Dr. John Smith',
-            defaults={'specialization': 'General Medicine', 'contact': '+1-555-0101'},
-        )
-        self.stdout.write('✓ {} doctor record: Dr. John Smith'.format('Created' if dr_created else 'Existing'))
+        # Link ALL doctors from DB to Django users
+        def _normalize_username(full_name: str) -> str:
+            return re.sub(r"[^A-Za-z0-9]", "", full_name).lower()
 
-        # Another doctor for variety
-        doctor_record2, dr2_created = Doctor.objects.get_or_create(
-            name='Dr. Sarah Johnson',
-            defaults={'specialization': 'Cardiology', 'contact': '+1-555-0102'},
-        )
-        self.stdout.write('✓ {} doctor record: Dr. Sarah Johnson'.format('Created' if dr2_created else 'Existing'))
+        new_users = 0
+        new_profiles = 0
 
-        # Doctor user
-        doctor_user, created = User.objects.get_or_create(
-            username='doctor',
-            defaults={
-                'email': 'doctor@hospital.com',
-                'first_name': 'Dr. John',
-                'last_name': 'Smith',
-                'is_staff': False,
-                'is_superuser': False,
-            },
-        )
-        if created:
-            doctor_user.set_password('doctor123')
-            doctor_user.save()
-            self.stdout.write('✓ Created doctor user')
-        else:
-            self.stdout.write('✓ Doctor user already exists')
+        for doctor in Doctor.objects.all():
+            username = _normalize_username(doctor.name)
+            password = f"{username}123"
 
-        doctor_profile, created = HospitalUser.objects.get_or_create(
-            user=doctor_user,
-            defaults={'role': 'Doctor', 'doctor': doctor_record},
-        )
-        if created:
-            self.stdout.write('✓ Created doctor HospitalUser profile')
-        else:
-            # If profile exists without doctor, try to set doctor linkage
-            if not doctor_profile.doctor:
-                doctor_profile.doctor = doctor_record
-                doctor_profile.save()
-            self.stdout.write('✓ Doctor HospitalUser profile already exists')
+            # Split name into first/last and strip 'Dr' prefix if present
+            parts = [p for p in re.split(r"\s+", doctor.name.strip()) if p]
+            if parts and parts[0].lower().startswith('dr'):
+                parts = parts[1:]
+            first_name = parts[0] if parts else ''
+            last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
 
-        # Staff user
-        staff_user, created = User.objects.get_or_create(
-            username='staff',
-            defaults={
-                'email': 'staff@hospital.com',
-                'first_name': 'Jane',
-                'last_name': 'Doe',
-                'is_staff': False,
-                'is_superuser': False,
-            },
-        )
-        if created:
-            staff_user.set_password('staff123')
-            staff_user.save()
-            self.stdout.write('✓ Created staff user')
-        else:
-            self.stdout.write('✓ Staff user already exists')
+            user, user_created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'is_staff': False,
+                    'is_superuser': False,
+                },
+            )
+            if user_created:
+                user.set_password(password)
+                user.save()
+                new_users += 1
 
-        staff_profile, created = HospitalUser.objects.get_or_create(
-            user=staff_user,
-            defaults={'role': 'Staff', 'doctor': None},
-        )
-        if created:
-            self.stdout.write('✓ Created staff HospitalUser profile')
-        else:
-            self.stdout.write('✓ Staff HospitalUser profile already exists')
+            hospital_user, profile_created = HospitalUser.objects.get_or_create(
+                user=user,
+                defaults={'role': 'Doctor', 'doctor': doctor},
+            )
+            if profile_created:
+                new_profiles += 1
+
+            self.stdout.write(
+                f"Doctor: {doctor.name} -> username='{username}' password='{password}'"
+            )
 
         self.stdout.write('\n' + '=' * 50)
-        self.stdout.write('DEMO USERS READY')
+        self.stdout.write('Linking complete')
         self.stdout.write('=' * 50)
-        self.stdout.write('Login Credentials:')
-        self.stdout.write('Admin:  admin/admin123')
-        self.stdout.write('Doctor: doctor/doctor123')
-        self.stdout.write('Staff:  staff/staff123')
-        self.stdout.write('=' * 50)
+        self.stdout.write(self.style.SUCCESS(
+            f"New doctor users: {new_users}, new profiles: {new_profiles}"
+        ))
