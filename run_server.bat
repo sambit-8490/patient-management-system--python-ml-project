@@ -44,6 +44,7 @@ python manage.py shell -c "from django.contrib.auth.models import User; User.obj
 
 REM Create demo users with HospitalUser profiles
 echo Creating demo users...
+python manage.py create_demo_users
 python create_demo_users.py
 
 REM Load sample data
