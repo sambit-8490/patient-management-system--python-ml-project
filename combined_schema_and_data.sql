@@ -89,17 +89,19 @@ CREATE TABLE Users (
 );
 
 -- Sample Data
-INSERT INTO Patients (name, gender, dob, contact, blood_group) VALUES
-('John Smith', 'Male', '1985-03-15', '+1-555-0101', 'A+'),
-('Sarah Johnson', 'Female', '1990-07-22', '+1-555-0102', 'B+'),
-('Michael Brown', 'Male', '1978-11-08', '+1-555-0103', 'O+'),
-('Emily Davis', 'Female', '1992-05-14', '+1-555-0104', 'AB+'),
-('David Wilson', 'Male', '1988-09-30', '+1-555-0105', 'A-'),
-('Lisa Anderson', 'Female', '1983-12-03', '+1-555-0106', 'B-'),
-('Robert Taylor', 'Male', '1975-04-18', '+1-555-0107', 'O-'),
-('Jennifer Martinez', 'Female', '1995-08-25', '+1-555-0108', 'AB-'),
-('William Garcia', 'Male', '1980-01-12', '+1-555-0109', 'A+'),
-('Amanda Rodriguez', 'Female', '1987-06-07', '+1-555-0110', 'B+');
+
+
+-- Alternative approach using patient IDs if you have them
+UPDATE Patients SET name = 'Carlos Hernández' WHERE name = 'John Smith';
+UPDATE Patients SET name = 'María García' WHERE name = 'Sarah Johnson';
+UPDATE Patients SET name = 'Miguel López' WHERE name = 'Michael Brown';
+UPDATE Patients SET name = 'Ana Martínez' WHERE name = 'Emily Davis';
+UPDATE Patients SET name = 'José González' WHERE name = 'David Wilson';
+UPDATE Patients SET name = 'Isabel Rodríguez' WHERE name = 'Lisa Anderson';
+UPDATE Patients SET name = 'Francisco Pérez' WHERE name = 'Robert Taylor';
+UPDATE Patients SET name = 'Carmen Sánchez' WHERE name = 'Jennifer Martinez';
+UPDATE Patients SET name = 'Javier Ramírez' WHERE name = 'William Garcia';
+UPDATE Patients SET name = 'Elena Torres' WHERE name = 'Amanda Rodriguez';
 
 INSERT INTO Doctors (name, specialization, contact) VALUES
 ('Dr. John Smith', 'General Medicine', '+1-555-1001'),
