@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Print Bill</title>
+</head>
+<body onload="window.print()">
+
+<h2>Hospital Bill</h2>
+
+<p><strong>Bill ID:</strong> {{ bill.BillID }}</p>
+<p><strong>Patient:</strong> {{ bill.appointment.patient.name }}</p>
+<p><strong>Doctor:</strong> {{ bill.appointment.doctor.name }}</p>
+<p><strong>Date:</strong> {{ bill.billing_date }}</p>
+
+<hr>
+
+<p><strong>Amount:</strong> ₹{{ bill.amount }}</p>
+<p><strong>Status:</strong> {{ bill.payment_status }}</p>
+<p><strong>Method:</strong> {{ bill.payment_method }}</p>
+
+</body>
+</html>

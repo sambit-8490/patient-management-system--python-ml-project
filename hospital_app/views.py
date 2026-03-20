@@ -321,6 +321,18 @@ def update_appointment_status(request, AppointmentID):
         if new_status in ['Scheduled', 'Completed', 'Cancelled']:
             appointment.status = new_status
             appointment.save()
+
+            if new_status == 'Completed':
+                Billing.objects.get_or_create(
+                    appointment=appointment,
+                    defaults={
+                        'amount': 500,
+                        'payment_status': 'Pending',
+                        'payment_method': 'Cash',
+                        'billing_date': timezone.now()
+                    }
+                )
+
             messages.success(request, f'Appointment status updated to {new_status}')
         else:
             messages.error(request, 'Invalid status')
@@ -559,3 +571,25 @@ def add_treatment(request, AppointmentID):
             messages.error(request, f'Error adding treatment: {str(e)}')
     
     return redirect('appointment_detail', AppointmentID=AppointmentID)
+
+
+@login_required
+def print_bill(request, BillID):
+    try:
+        hospital_user = HospitalUser.objects.get(user=request.user)
+        role = hospital_user.role
+    except HospitalUser.DoesNotExist:
+        messages.error(request, 'User profile not found')
+        return redirect('login')
+
+    bill = get_object_or_404(
+        Billing.objects.select_related('appointment__patient', 'appointment__doctor'),
+        BillID=BillID
+    )
+
+    context = {
+        'bill': bill,
+        'role': role,
+    }
+
+    return render(request, 'hospital_app/print_bill.html', context)
