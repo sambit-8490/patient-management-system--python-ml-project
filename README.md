@@ -292,6 +292,12 @@ DATABASES = {
    python create_users.py   # Admin/Doctor/Staff interactively
    ```
 
+   
+Using docker create admin,user:
+docker exec -it django_app python create_users.py
+
+
+
 Troubleshooting:
 - Access denied: verify credentials and MySQL is running.
 - `mysql` not found: add MySQL bin to PATH or run from MySQL Shell.
