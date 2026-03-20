@@ -292,9 +292,14 @@ DATABASES = {
    python create_users.py   # Admin/Doctor/Staff interactively
    ```
 
+
+
    
 Using docker create admin,user:
+
 docker exec -it django_app python create_users.py
+
+
 
 
 
